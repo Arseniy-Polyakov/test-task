@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Персональный ассистент по финансовым курсам</title>
+  <link rel="stylesheet" href="/static/css_templates/style_start_template.css">
+</head>
+
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <section class="msger">
+    <header class="msger-header">
+      <div class="msger-header-title">
+        <i class="fas fa-comment-alt"></i> Персональный ассистент по финансовым курсам
+      </div>
+      <div class="msger-header-options">
+        <span><i class="fas fa-cog"></i></span>
+      </div>
+    </header>
+
+    <main class="msger-chat" id="chat"></main>
+
+    <form class="msger-inputarea" onsubmit="sendMessage(event)">
+      <input id="input" type="text" placeholder="Введите сообщение" required>
+      <button type="submit" class="btnsend">Отправить</button>
+    </form>
+
+    <script>
+      window.onload = function () {
+        const chat = document.getElementById("chat");
+
+        chat.innerHTML += `
+            <div class="msg left-msg">
+                <div class="msg-img"
+                    style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)">
+                </div>
+                <div class="msg-bubble">
+                    <div class="msg-text">
+                    Какой вопрос по курсам Вас интересует?
+                    </div>
+                </div>
+            </div>
+            `;
+      };
+
+      async function sendMessage(event) {
+        event.preventDefault();
+
+        const input = document.getElementById("input");
+        const text = input.value;
+
+        const chat = document.getElementById("chat");
+
+        chat.innerHTML += `
+        <div class="msg right-msg">
+          <div class="msg-img"
+            style="background-image: url(https://image.flaticon.com/icons/svg/145/145867.svg)">
+          </div>
+          <div class="msg-bubble">
+            <div class="msg-info">
+              <div class="msg-info-name">Клиент</div>
+              <div class="msg-info-time"></div>
+            </div>
+            <div class="msg-text">${text}</div>
+          </div>
+        </div>
+        `;
+
+        input.value = "";
+
+        const response = await fetch("/message/completion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            user_text: text
+          })
+        });
+
+        const data = await response.json();
+        const modelAnswer = data.model_answer;
+        const markdownModelAnswer = marked.parse(modelAnswer);
+
+        chat.innerHTML += `
+        <div class="msg left-msg">
+          <div class="msg-img"
+            style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)">
+          </div>
+          <div class="msg-bubble">
+            <div class="msg-info">
+              <div class="msg-info-name">Ассистент</div>
+              <div class="msg-info-time"></div>
+            </div>
+            <div class="msg-text">${markdownModelAnswer}</div>
+          </div>
+        </div>
+        `;
+      }
+    </script>
+
+</body>
+
+</html>
