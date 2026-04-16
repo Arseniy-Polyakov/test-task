@@ -7,3 +7,6 @@ pydantic
 pandas
 requests
 python-multipart
+scikit-learn
+faiss-cpu
+json_repair
